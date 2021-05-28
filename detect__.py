@@ -105,84 +105,90 @@ def txt_format(path):
         ImageDraw.Draw(jpg).rectangle([XLS[i], YLS[i], XRS[i], YRS[i]], fill=None, outline=color,
                                       width=2)
     s = 'without nms: ' + str(without_nms_count) + '/' + str(len(XLS)) + str('\n')
-    print(s)
-    readme.write(s)
-    raw_image_res = jpg.convert('RGB')
-    raw_image_res.save(res_path + 'res_' + raw_jpg_filename)
-    for i in range(0, len(XLS)):
-        bbox[i][0] = XLS[i]
-        bbox[i][1] = YLS[i]
-        bbox[i][2] = XRS[i]
-        bbox[i][3] = YRS[i]
-        bbox[i][4] = CONF[i]
-        bbox[i][5] = CLASS[i]
+    if without_nms_count != 0:
+        print(s)
+        readme.write(s)
+        raw_image_res = jpg.convert('RGB')
+        raw_image_res.save(res_path + 'res_' + raw_jpg_filename)
+        for i in range(0, len(XLS)):
+            bbox[i][0] = XLS[i]
+            bbox[i][1] = YLS[i]
+            bbox[i][2] = XRS[i]
+            bbox[i][3] = YRS[i]
+            bbox[i][4] = CONF[i]
+            bbox[i][5] = CLASS[i]
 
-    res = nms(bbox, 0.1)
-    res = np.sort(res)
 
-    for i in range(0, len(res)):
-        bbox_res = np.zeros([len(res), 6])
+        res = nms(bbox, 0.1)
+        res = np.sort(res)
 
-    jpg2 = Image.open(raw_jpg)
-    img = cv2.imread(raw_jpg)
-    for i in range(0, len(res)):
-        nms_count += 1
-        bbox_res[i][0] = bbox[res[i]][0]
-        bbox_res[i][1] = bbox[res[i]][1]
-        bbox_res[i][2] = bbox[res[i]][2]
-        bbox_res[i][3] = bbox[res[i]][3]
-        bbox_res[i][4] = bbox[res[i]][4]
-        bbox_res[i][5] = bbox[res[i]][5]
-        # color = [random.randint(0, 255) for _ in range(3)]
+        for i in range(0, len(res)):
+            bbox_res = np.zeros([len(res), 6])
 
-        if bbox_res[i][4] < 0.7:
-            label = str(int(bbox_res[i][5])) + '_' + str(bbox_res[i][4] * 100).split('.')[0] + '%'
-            ImageDraw.Draw(jpg2).rectangle([bbox_res[i][0], bbox_res[i][1], bbox_res[i][2], bbox_res[i][3]],
-                                           fill=None,
-                                           outline=(255, 0, 0), width=2)
-            t_size = cv2.getTextSize(label, 0, fontScale=1, thickness=2)[0]
-            ImageDraw.Draw(jpg2).rectangle(
-                [bbox_res[i][0], bbox_res[i][1] - t_size[1], bbox_res[i][0] + 60, bbox_res[i][1]],
-                fill=(255, 0, 0),
-                outline=(255, 0, 0), width=2)
-            ImageDraw.Draw(jpg2).text((bbox_res[i][0], bbox_res[i][1] - t_size[1]),
-                                      label,
-                                      font=ImageFont.truetype(r"C:\Windows\Fonts\Calibrib.ttf",
-                                                              t_size[1]),
-                                      fill=(255, 255, 255))
-        else:
-            accurate_count += 1
-            label = str(int(bbox_res[i][5])) + '_' + str(bbox_res[i][4] * 100).split('.')[0] + '%'
-            # if (str(int(bbox_res[i][5])) == '1'):
-            #     label = 'Floating_Roof_Tanks'
-            # else:
-            #     label = 'Fixed_Roof_Tanks'
+        jpg2 = Image.open(raw_jpg)
+        img = cv2.imread(raw_jpg)
+        for i in range(0, len(res)):
+            nms_count += 1
+            bbox_res[i][0] = bbox[res[i]][0]
+            bbox_res[i][1] = bbox[res[i]][1]
+            bbox_res[i][2] = bbox[res[i]][2]
+            bbox_res[i][3] = bbox[res[i]][3]
+            bbox_res[i][4] = bbox[res[i]][4]
+            bbox_res[i][5] = bbox[res[i]][5]
+            # color = [random.randint(0, 255) for _ in range(3)]
 
-            t_size = cv2.getTextSize(label, 0, fontScale=1, thickness=1)[0]
+            if bbox_res[i][4] < 0.7:
+                label = str(int(bbox_res[i][5])) + '_' + str(bbox_res[i][4] * 100).split('.')[0] + '%'
+                ImageDraw.Draw(jpg2).rectangle([bbox_res[i][0], bbox_res[i][1], bbox_res[i][2], bbox_res[i][3]],
+                                               fill=None,
+                                               outline=(255, 0, 0), width=2)
+                t_size = cv2.getTextSize(label, 0, fontScale=1, thickness=2)[0]
+                ImageDraw.Draw(jpg2).rectangle(
+                    [bbox_res[i][0], bbox_res[i][1] - t_size[1], bbox_res[i][0] + 60, bbox_res[i][1]],
+                    fill=(255, 0, 0),
+                    outline=(255, 0, 0), width=2)
+                ImageDraw.Draw(jpg2).text((bbox_res[i][0], bbox_res[i][1] - t_size[1]),
+                                          label,
+                                          font=ImageFont.truetype(r"C:\Windows\Fonts\Calibrib.ttf",
+                                                                  t_size[1]),
+                                          fill=(255, 255, 255))
+            else:
+                accurate_count += 1
+                label = str(int(bbox_res[i][5])) + '_' + str(bbox_res[i][4] * 100).split('.')[0] + '%'
+                # if (str(int(bbox_res[i][5])) == '1'):
+                #     label = 'Floating_Roof_Tanks'
+                # else:
+                #     label = 'Fixed_Roof_Tanks'
 
-            ImageDraw.Draw(jpg2).rectangle([bbox_res[i][0], bbox_res[i][1], bbox_res[i][2], bbox_res[i][3]],
-                                           fill=None,
-                                           outline=(1, 129, 74), width=2)
-            ImageDraw.Draw(jpg2).rectangle(
-                [bbox_res[i][0], bbox_res[i][1] - t_size[1], bbox_res[i][0] + 70, bbox_res[i][1]],
-                fill=(1, 129, 74),
-                outline=(1, 129, 74), width=2)
-            ImageDraw.Draw(jpg2).text((bbox_res[i][0], bbox_res[i][1] - t_size[1]),
-                                      label,
-                                      font=ImageFont.truetype(r"C:\Windows\Fonts\Calibrib.ttf",
-                                                              t_size[1]),
-                                      fill=(255, 255, 255))
+                t_size = cv2.getTextSize(label, 0, fontScale=1, thickness=1)[0]
 
-    s2 = 'with nms: ' + str(nms_count) + '/' + str(len(res)) + str('\n')
-    print(s2)
-    readme.write(s2)
-    raw_image_res = jpg2.convert('RGB')
-    t = time.strftime("%m%d-%H%M", time.localtime())
-    raw_image_res.save(res_path + t + '_nms_res_' + raw_jpg_filename)
-    s3 = 'accurate: ' + str(accurate_count) + '/ 435' + str('\n')
-    print(s3)
-    readme.write(s3)
-    print('done')
+                ImageDraw.Draw(jpg2).rectangle([bbox_res[i][0], bbox_res[i][1], bbox_res[i][2], bbox_res[i][3]],
+                                               fill=None,
+                                               outline=(1, 129, 74), width=2)
+                ImageDraw.Draw(jpg2).rectangle(
+                    [bbox_res[i][0], bbox_res[i][1] - t_size[1], bbox_res[i][0] + 70, bbox_res[i][1]],
+                    fill=(1, 129, 74),
+                    outline=(1, 129, 74), width=2)
+                ImageDraw.Draw(jpg2).text((bbox_res[i][0], bbox_res[i][1] - t_size[1]),
+                                          label,
+                                          font=ImageFont.truetype(r"C:\Windows\Fonts\Calibrib.ttf",
+                                                                  t_size[1]),
+                                          fill=(255, 255, 255))
+
+        s2 = 'with nms: ' + str(nms_count) + '/' + str(len(res)) + str('\n')
+        print(s2)
+        readme.write(s2)
+        raw_image_res = jpg2.convert('RGB')
+        t = time.strftime("%m%d-%H%M", time.localtime())
+        res_file = res_path + t + '_nms_res_' + raw_jpg_filename
+        raw_image_res.save(res_path + t + '_nms_res_' + raw_jpg_filename)
+        s3 = 'accurate: ' + str(accurate_count) + '/ 435' + str('\n')
+        print(s3)
+        readme.write(s3)
+        print('done')
+        return res_file
+    else:
+        return -1
 
 
 def json_format(jsonfile):
@@ -428,89 +434,100 @@ def generate_train_folder(labelpath, from_, to_, trainval_file):
 
 if __name__ == '__main__':
     Image.MAX_IMAGE_PIXELS = 2300000000
-    XLS = []
-    XRS = []
-    YLS = []
-    YRS = []
-    CONF = []
-    CLASS = []
-    # raw_tif = r"D:\oiltank_data\JL1GF03B01_PMS_20210412000712_200046889\JL1GF03B01_PMS_20210412000712_200046889.tif"
-    # weights = r'D:\PyTorch_YOLOv4-master\best.pt'
-    image_size = 416
-    raw_tif = argv[1]
+    raw_dir = argv[1]
     weights = argv[2]
     cfg = argv[3]
-    # image_size = argv[3]
-    raw_jpg = tif2jpg(raw_tif, raw_tif.split('.')[0] + '.jpg')
-    json_file = raw_tif.split('.')[0] + '.json'
-    txt_file = raw_tif.split('.')[0] + '.txt'
-    raw_jpg_filename = os.path.basename(raw_jpg)
-    # slice_res_path = os.path.join(os.path.dirname(raw_jpg),
-    #                               os.path.basename(argv[2]).split('.')[0] + time.strftime("----%m%d-%H%M",
-    #                                                                                       time.localtime()) + '_slice_res')
-    # res_path = os.path.join(os.path.dirname(raw_jpg),
-    #                         os.path.basename(argv[2]).split('.')[0] + time.strftime("----%m%d-%H%M",
-    #                                                                                 time.localtime()) + '_res/')
+    for root, dirs, files in os.walk(raw_dir):
+        for file in files:
+            if root == 'D:\OILTANK_TEST':
+                XLS = []
+                XRS = []
+                YLS = []
+                YRS = []
+                CONF = []
+                CLASS = []
+                res_dir = os.path.join(raw_dir + '/res/')
+                if not os.path.exists(res_dir):
+                    os.makedirs(res_dir)
+                raw_tif = os.path.join(root, file)
+                base_dir = os.path.join(root, file.split('.')[0] + '/')
+                if not os.path.exists(base_dir):
+                    os.makedirs(base_dir)
 
-    # if not os.path.exists(slice_path):
-    #     os.makedirs(slice_path)
-    # if not os.path.exists(res_path):
-    #     os.makedirs(res_path)
-    # if not os.path.exists(slice_res_path):
-    #     os.makedirs(slice_res_path)
+                raw_jpg = tif2jpg(raw_tif, os.path.join(base_dir, file.split('.')[0] + '.jpg'))
+                # json_file = raw_tif.split('.')[0] + '.json'
+                # txt_file = raw_tif.split('.')[0] + '.txt'
+                raw_jpg_filename = os.path.basename(raw_jpg)
+                # slice_res_path = os.path.join(os.path.dirname(raw_jpg),
+                #                               os.path.basename(argv[2]).split('.')[0] + time.strftime("----%m%d-%H%M",
+                #                                                                                       time.localtime()) + '_slice_res')
+                # res_path = os.path.join(os.path.dirname(raw_jpg),
+                #                         os.path.basename(argv[2]).split('.')[0] + time.strftime("----%m%d-%H%M",
+                #                                                                                 time.localtime()) + '_res/')
 
-    base_dir = os.path.dirname(raw_jpg)
-    slice_path = os.path.join(base_dir, 'slice/')
-    if not os.path.exists(slice_path):
-        os.makedirs(slice_path)
-    index = dirnum(base_dir) - 1
-    base_res_dir = os.path.join(base_dir, 'exp' + str(index))
-    os.makedirs(base_res_dir)
-    readme = open(os.path.join(base_res_dir, 'readme.md'), 'w')
-    readme.write(argv[2])
-    readme.write('\n')
+                # if not os.path.exists(slice_path):
+                #     os.makedirs(slice_path)
+                # if not os.path.exists(res_path):
+                #     os.makedirs(res_path)
+                # if not os.path.exists(slice_res_path):
+                #     os.makedirs(slice_res_path)
 
-
-    slice_res_path = os.path.join(base_res_dir, 'slice_res/')
-    os.makedirs(slice_res_path)
-    slice_res_label_path = os.path.join(base_res_dir, 'slice_res_label/')
-    os.makedirs(slice_res_label_path)
-    res_path = os.path.join(base_res_dir, 'result/')
-    os.makedirs(res_path)
-    train_path = os.path.join(base_res_dir, 'train/')
-    os.makedirs(train_path)
-    trainval_file = os.path.join(base_res_dir, 'val.txt')
-    # for yolov4
-    # if os.path.getsize(json_file) == 0:
-    #     slice_im_plus_boxes(image_path=raw_jpg, out_name=os.path.splitext(raw_jpg_filename)[0],
-    #                         out_dir_images=slice_path, image_size=image_size,
-    #                         overlap=0.2)
-    #     open(txt_file, 'w+')
-    #     generate_file(slice_path, txt_file)
-    #     os.system(
-    #         r'darknet.exe detector test voc.data yolov4-custom.cfg ' + weights + ' -ext_output -dont_show -out ' + json_file + ' <' + txt_file)
-    #     change_slash(json_file)
-    # json_format(json_file)
-
-    # for yolov4-pytorch
-    # print(slice_res_path.split('\\')[-1].split('----')[0])
-    # print(argv[2].split('\\')[-1].split('.')[0])
-    # arg1 = slice_res_path.split('\\')[-1].split('----')[0]
-    # arg2 = argv[2].split('\\')[-1].split('.')[0]
-    # if os.path.dirname(slice_res_path) != 0 and arg1 == arg2 :
-
-    # if os.path.dirname(slice_res_path) == 0:
+                # base_dir = os.path.dirname(raw_jpg)
+                slice_path = os.path.join(base_dir, 'slice/')
+                if not os.path.exists(slice_path):
+                    os.makedirs(slice_path)
+                index = dirnum(base_dir) - 1
+                base_res_dir = os.path.join(base_dir, 'exp' + str(index))
+                os.makedirs(base_res_dir)
+                readme = open(os.path.join(base_res_dir, 'readme.md'), 'w')
+                readme.write(argv[2])
+                readme.write('\n')
 
 
-    if len(os.listdir(slice_path)) == 0:
-    # if not os.path.exists(slice_path):
-        slice_im_plus_boxes(image_path=raw_jpg, out_name=os.path.splitext(raw_jpg_filename)[0], out_dir_images=slice_path,
-                            overlap=0.2)
-    print(argv[2].split('\\')[-1])
-    os.system(
-        r'python .\detect.py --img 416 --cfg .\\' + argv[3].split('\\')[-1] + ' --weights .\\' + argv[2].split('\\')[
-            -1] + ' --source ' + slice_path + ' --save-txt --output ' + slice_res_path)
-    pretreat(slice_res_path, slice_res_label_path)
-    txt_format(slice_res_label_path)
-    generate_train_folder(slice_res_label_path, slice_path, train_path, trainval_file)
-    # shutil.rmtree(slice_path)
+                slice_res_path = os.path.join(base_res_dir, 'slice_res/')
+                os.makedirs(slice_res_path)
+                slice_res_label_path = os.path.join(base_res_dir, 'slice_res_label/')
+                os.makedirs(slice_res_label_path)
+                res_path = os.path.join(base_res_dir, 'result/')
+                os.makedirs(res_path)
+                train_path = os.path.join(base_res_dir, 'train/')
+                os.makedirs(train_path)
+                trainval_file = os.path.join(base_res_dir, 'val.txt')
+                # for yolov4
+                # if os.path.getsize(json_file) == 0:
+                #     slice_im_plus_boxes(image_path=raw_jpg, out_name=os.path.splitext(raw_jpg_filename)[0],
+                #                         out_dir_images=slice_path, image_size=image_size,
+                #                         overlap=0.2)
+                #     open(txt_file, 'w+')
+                #     generate_file(slice_path, txt_file)
+                #     os.system(
+                #         r'darknet.exe detector test voc.data yolov4-custom.cfg ' + weights + ' -ext_output -dont_show -out ' + json_file + ' <' + txt_file)
+                #     change_slash(json_file)
+                # json_format(json_file)
+
+                # for yolov4-pytorch
+                # print(slice_res_path.split('\\')[-1].split('----')[0])
+                # print(argv[2].split('\\')[-1].split('.')[0])
+                # arg1 = slice_res_path.split('\\')[-1].split('----')[0]
+                # arg2 = argv[2].split('\\')[-1].split('.')[0]
+                # if os.path.dirname(slice_res_path) != 0 and arg1 == arg2 :
+
+                # if os.path.dirname(slice_res_path) == 0:
+
+
+                if len(os.listdir(slice_path)) == 0:
+                # if not os.path.exists(slice_path):
+                    slice_im_plus_boxes(image_path=raw_jpg, out_name=os.path.splitext(raw_jpg_filename)[0], out_dir_images=slice_path,
+                                        overlap=0.2)
+                # print(argv[2].split('\\')[-1])
+                os.system(
+                    r'python .\detect.py --img 416 --cfg .\\' + argv[3].split('\\')[-1] + ' --weights .\\' + argv[2].split('\\')[
+                        -1] + ' --source ' + slice_path + ' --save-txt --output ' + slice_res_path)
+                pretreat(slice_res_path, slice_res_label_path)
+                raw_image_res = txt_format(slice_res_label_path)
+                if raw_image_res != -1:
+                    generate_train_folder(slice_res_label_path, slice_path, train_path, trainval_file)
+                    # shutil.rmtree(slice_path)
+                    print('raw_image_res',raw_image_res)
+                    print('-',os.path.join(res_dir, file.split('.')[0] + '.jpg'))
+                    shutil.copyfile(raw_image_res, os.path.join(res_dir, file.split('.')[0] + '.jpg'))

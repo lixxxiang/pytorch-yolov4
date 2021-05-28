@@ -74,6 +74,7 @@ def detect(save_img=False):
 
     # Run inference
     t0 = time.time()
+    t = 0
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
     _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
     for path, img, im0s, vid_cap in dataset:
@@ -122,13 +123,14 @@ def detect(save_img=False):
                         with open(txt_path + '.txt', 'a') as f:
                             f.write(('%g ' * 5 + str(float(conf)) + '\n') % (cls, *xywh))  # label format
 
+
                     if save_img or view_img:  # Add bbox to image
                         label = '%s %.2f' % (names[int(cls)], conf)
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
 
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
-
+            t += t2-t1
             # Stream results
             if view_img:
                 cv2.imshow(p, im0)
@@ -158,6 +160,7 @@ def detect(save_img=False):
             os.system('open ' + save_path)
 
     print('Done. (%.3fs)' % (time.time() - t0))
+    print('Done. (%.3fs)' % t)
 
 
 if __name__ == '__main__':
